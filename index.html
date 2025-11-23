@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción GASTROFUSION 360</title>
+    <link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+
+    <div class="container">
+        <img src="logo.jpg" alt="Logo Gastrofusion 360" class="logo">
+        
+        <h2>Registro de Interés - GASTROFUSION 360</h2>
+        <p>Por favor, completa la siguiente información para iniciar tu proceso de participación.</p>
+
+        <form id="submissionForm"> 
+
+            <label for="email">Correo electrónico (*)</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="ciudad">Ciudad (*)</label>
+            <input type="text" id="ciudad" name="ciudad" required>
+
+            <label for="celular">Número de Celular (*)</label>
+            <input type="tel" id="celular" name="celular" required>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="whatsapp_same" checked>
+                <label for="whatsapp_same">Mi número de WhatsApp es el mismo que el celular.</label>
+            </div>
+            
+            <div id="whatsapp_field" style="display: none;">
+                <label for="whatsapp">Número de WhatsApp diferente</label>
+                <input type="tel" id="whatsapp_input" name="whatsapp"> 
+            </div>
+            
+            <input type="hidden" id="whatsapp_hidden" name="whatsapp">
+
+
+            <label for="sector">Marca tu sector perteneciente (*)</label>
+            <select id="sector" name="sector" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Restaurante">Restaurante</option>
+                <option value="Zona Dulce">Zona Dulce</option>
+                <option value="Zona Spirits">Zona Spirits</option>
+                <option value="Gran Salón">Gran Salón</option>
+                <option value="Zona de Experiencias">Zona de Experiencias</option>
+            </select>
+
+            <label for="marca">Nombre de tu marca (*)</label>
+            <input type="text" id="marca" name="marca" required>
+
+            <label for="representante">Nombre de representante legal / Persona encargada (*)</label>
+            <input type="text" id="representante" name="representante" required>
+
+            <label for="anos">Años en el mercado (*)</label>
+            <input type="number" id="anos" name="anos" min="0" required>
+
+            <label>¿Has participado con nosotros? (*)</label>
+            <div class="radio-group">
+                <input type="radio" id="participado_si" name="participado_radio" value="Sí" required>
+                <label for="participado_si">Sí</label>
+                <input type="radio" id="participado_no" name="participado_radio" value="No">
+                <label for="participado_no">No</label>
+            </div>
+
+            <div id="participado_year_field" style="display: none;">
+                <label for="participado_year">¿En qué año? (Ej: 2023)</label>
+                <input type="number" id="participado_year" min="1900" max="2050">
+            </div>
+
+            <input type="hidden" id="participado" name="participado">
+
+
+            <label for="ferias">¿Has participado en ferias? Nombra cuáles</label>
+            <textarea id="ferias" name="ferias" rows="3"></textarea>
+
+            <label for="decisor">¿Eres tomador de decisión para la participación en GASTROFUSION 360? (*)</label>
+            <select id="decisor" name="decisor" required>
+                <option value="" disabled selected>Selecciona una opción</option>
+                <option value="Sí, soy el tomador de decisión">Sí</option>
+                <option value="No, pero informaré al tomador de decisión">No</option>
+            </select>
+
+            <label for="redes">Instagram o página web de tu marca</label>
+            <input type="text" id="redes" name="redes">
+
+            <button type="submit" id="submitButton">Enviar Registro</button>
+
+            <div id="loading" style="display: none; color: #007bff;">Enviando datos...</div>
+            <div id="successMessage" style="display: none; color: green;">¡Gracias! Tu registro ha sido enviado con éxito.</div>
+            <div id="errorMessage" style="display: none; color: red;">Error al enviar. Intenta de nuevo.</div>
+
+        </form>
+    </div>
+
+    <script>
+        // 1. **REEMPLAZA ESTA URL CON LA QUE COPIASTE DEL PASO 2**
+        const APP_WEB_URL = 'https://script.google.com/macros/s/AKfycbwqbVIs7uXppBzUfr1Bkw41DVowPGdb-CBTHB2FJivqkrEXLztUIVOX5XtJBWa1tsruyA/exec'; // ¡ACTUALIZA ESTO!
+        
+        const form = document.getElementById('submissionForm');
+        const submitButton = document.getElementById('submitButton');
+        const loading = document.getElementById('loading');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Lógica de WhatsApp: Copia el celular si el checkbox está marcado
+        const celularInput = document.getElementById('celular');
+        const whatsappCheckbox = document.getElementById('whatsapp_same');
+        const whatsappField = document.getElementById('whatsapp_field');
+        const whatsappInput = document.getElementById('whatsapp_input');
+        const whatsappHidden = document.getElementById('whatsapp_hidden');
+        
+        // Lógica de "Participación Anterior"
+        const participadoSi = document.getElementById('participado_si');
+        const participadoNo = document.getElementById('participado_no');
+        const participadoYearField = document.getElementById('participado_year_field');
+        const participadoYearInput = document.getElementById('participado_year');
+        const participadoHidden = document.getElementById('participado');
+
+
+        // Función para manejar la visibilidad y el valor del campo WhatsApp
+        function handleWhatsappLogic() {
+            if (whatsappCheckbox.checked) {
+                whatsappField.style.display = 'none';
+                whatsappInput.value = ''; // Limpiar el campo visible
+                whatsappHidden.value = celularInput.value; // Copia el celular al campo oculto que se envía
+            } else {
+                whatsappField.style.display = 'block';
+                whatsappHidden.value = whatsappInput.value; // Usa el valor ingresado en el campo visible
+            }
+        }
+        
+        // Función para manejar la visibilidad y el valor del campo Participación
+        function handleParticipacionLogic() {
+            if (participadoSi.checked) {
+                participadoYearField.style.display = 'block';
+                // Combina "Sí" y el año en el campo oculto
+                participadoHidden.value = "Sí - Año: " + participadoYearInput.value;
+            } else if (participadoNo.checked) {
+                participadoYearField.style.display = 'none';
+                participadoHidden.value = "No";
+            } else {
+                 participadoYearField.style.display = 'none';
+                 participadoHidden.value = "";
+            }
+        }
+
+        // Asignar eventos de escucha
+        celularInput.addEventListener('input', handleWhatsappLogic);
+        whatsappCheckbox.addEventListener('change', handleWhatsappLogic);
+        whatsappInput.addEventListener('input', handleWhatsappLogic);
+        
+        participadoSi.addEventListener('change', handleParticipacionLogic);
+        participadoNo.addEventListener('change', handleParticipacionLogic);
+        participadoYearInput.addEventListener('input', handleParticipacionLogic);
+
+
+        // Inicializar la lógica al cargar la página
+        handleWhatsappLogic();
+        handleParticipacionLogic();
+
+
+        // Función principal de envío del formulario
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Detiene el envío normal del formulario HTML
+            
+            // Re-evaluar la lógica final antes de crear los datos
+            handleWhatsappLogic(); 
+            handleParticipacionLogic();
+            
+            // Mostrar estado de carga
+            submitButton.disabled = true;
+            loading.style.display = 'block';
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+
+            // Crear el objeto FormData con los datos del formulario
+            const data = new FormData(form);
+            
+            // Convertir FormData a un objeto de URLSearchParams (formato esperado por Apps Script)
+            const urlEncodedData = new URLSearchParams(data).toString();
+
+            fetch(APP_WEB_URL, {
+                method: 'POST',
+                mode: 'cors', // Necesario para evitar problemas de seguridad
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: urlEncodedData 
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Respuesta de red no fue OK: ' + response.statusText);
+                }
+                return response.json(); // Intentamos leer el JSON de respuesta del script
+            })
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.result === 'success') {
+                    successMessage.style.display = 'block';
+                    form.reset(); // Limpia el formulario
+                    // Re-inicializa la lógica después de limpiar
+                    handleWhatsappLogic();
+                    handleParticipacionLogic();
+                } else {
+                    errorMessage.style.display = 'block';
+                    console.error('Error del script:', data.message);
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                errorMessage.style.display = 'block';
+                console.error('Error de envío:', error);
+            })
+            .finally(() => {
+                submitButton.disabled = false; // Habilitar el botón de nuevo
+            });
+        });
+    </script>
+</body>
+</html>
